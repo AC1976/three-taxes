@@ -283,19 +283,19 @@
                 </div>
                 
                 <div class="param-section">
-                    <h3>Forfait Model</h3>
+                    <h3>Box 3 Old School</h3>
                     <div class="param-group">
                         <label for="forfaitR">Deemed Return Rate (%): <span class="value-display" id="forfaitR-val">4.0</span></label>
                         <input type="range" id="forfaitR" min="0" max="10" step="0.1" value="4.0">
                     </div>
                     <div class="param-group">
-                        <label for="forfaitTax">Tax Rate (%): <span class="value-display" id="forfaitTax-val">36</span></label>
-                        <input type="range" id="forfaitTax" min="0" max="100" step="1" value="36">
+                        <label for="forfaitTax">Tax Rate (%): <span class="value-display" id="forfaitTax-val">30</span></label>
+                        <input type="range" id="forfaitTax" min="0" max="100" step="1" value="30">
                     </div>
                 </div>
                 
                 <div class="param-section">
-                    <h3>Accrual Model</h3>
+                    <h3>Box 3 Revamped</h3>
                     <div class="param-group">
                         <label for="accrualTax">Tax Rate (%): <span class="value-display" id="accrualTax-val">36</span></label>
                         <input type="range" id="accrualTax" min="0" max="100" step="1" value="36">
@@ -303,7 +303,7 @@
                 </div>
                 
                 <div class="param-section">
-                    <h3>Labor Model</h3>
+                    <h3>Timmerfrans Special</h3>
                     <div class="param-group">
                         <label for="laborTax">Tax Rate (%): <span class="value-display" id="laborTax-val">55</span></label>
                         <input type="range" id="laborTax" min="0" max="100" step="1" value="55">
@@ -329,17 +329,17 @@
                     
                     <div class="metrics">
                         <div class="metric-card forfait">
-                            <h3>Forfait Model</h3>
+                            <h3>Box 3 Old School</h3>
                             <div class="value" id="forfait-value">€0</div>
                             <div class="tax" id="forfait-tax">Tax: €0</div>
                         </div>
                         <div class="metric-card accrual">
-                            <h3>Accrual Model</h3>
+                            <h3>Box 3 Revamped</h3>
                             <div class="value" id="accrual-value">€0</div>
                             <div class="tax" id="accrual-tax">Tax: €0</div>
                         </div>
                         <div class="metric-card labor">
-                            <h3>Labor Model</h3>
+                            <h3>Timmerfrans Special</h3>
                             <div class="value" id="labor-value">€0</div>
                             <div class="tax" id="labor-tax">Tax: €0</div>
                         </div>
@@ -743,21 +743,21 @@
             const tbody = document.getElementById('comparison-tbody');
             tbody.innerHTML = `
                 <tr>
-                    <td><strong>Forfait</strong></td>
+                    <td><strong>Box 3 Old School</strong></td>
                     <td>${formatCurrency(forfaitFinal.portfolioValue)}</td>
                     <td>${formatCurrency(forfaitFinal.cumulativeTax)}</td>
                     <td>${formatCurrency(forfaitFinal.portfolioValue - totalContributed)}</td>
                     <td>${((forfaitFinal.cumulativeTax / forfaitFinal.portfolioValue) * 100).toFixed(2)}%</td>
                 </tr>
                 <tr>
-                    <td><strong>Accrual</strong></td>
+                    <td><strong>Box 3 Revamped</strong></td>
                     <td>${formatCurrency(accrualFinal.portfolioValue)}</td>
                     <td>${formatCurrency(accrualFinal.cumulativeTax)}</td>
                     <td>${formatCurrency(accrualFinal.portfolioValue - totalContributed)}</td>
                     <td>${((accrualFinal.cumulativeTax / accrualFinal.portfolioValue) * 100).toFixed(2)}%</td>
                 </tr>
                 <tr>
-                    <td><strong>Labor</strong></td>
+                    <td><strong>Timmerfrans Special</strong></td>
                     <td>${formatCurrency(laborFinal.portfolioValue)}</td>
                     <td>${formatCurrency(laborFinal.cumulativeTax)}</td>
                     <td>${formatCurrency(laborFinal.portfolioValue - totalContributed)}</td>
@@ -782,7 +782,7 @@
                     labels: dates,
                     datasets: [
                         {
-                            label: 'Forfait',
+                            label: 'Box 3 Old School',
                             data: forfait.map(r => r.portfolioValue),
                             borderColor: '#FF6B6B',
                             backgroundColor: 'rgba(255, 107, 107, 0.1)',
@@ -790,7 +790,7 @@
                             tension: 0.4
                         },
                         {
-                            label: 'Accrual',
+                            label: 'Box 3 Revamped',
                             data: accrual.map(r => r.portfolioValue),
                             borderColor: '#4ECDC4',
                             backgroundColor: 'rgba(78, 205, 196, 0.1)',
@@ -798,7 +798,7 @@
                             tension: 0.4
                         },
                         {
-                            label: 'Labor',
+                            label: 'Timmerfrans Special',
                             data: labor.map(r => r.portfolioValue),
                             borderColor: '#95E1D3',
                             backgroundColor: 'rgba(149, 225, 211, 0.1)',
@@ -844,7 +844,7 @@
                     labels: dates,
                     datasets: [
                         {
-                            label: 'Forfait',
+                            label: 'Box 3 Old School',
                             data: forfait.map(r => r.cumulativeTax),
                             borderColor: '#FF6B6B',
                             backgroundColor: 'rgba(255, 107, 107, 0.3)',
@@ -853,7 +853,7 @@
                             tension: 0.4
                         },
                         {
-                            label: 'Accrual',
+                            label: 'Box 3 Revamped',
                             data: accrual.map(r => r.cumulativeTax),
                             borderColor: '#4ECDC4',
                             backgroundColor: 'rgba(78, 205, 196, 0.3)',
@@ -862,7 +862,7 @@
                             tension: 0.4
                         },
                         {
-                            label: 'Labor',
+                            label: 'Timmerfrans Special',
                             data: labor.map(r => r.cumulativeTax),
                             borderColor: '#95E1D3',
                             backgroundColor: 'rgba(149, 225, 211, 0.3)',
@@ -905,7 +905,7 @@
             
             const { forfait, accrual, labor, dates } = calculationResults;
             
-            let csv = 'Date,Forfait Portfolio,Forfait Tax,Accrual Portfolio,Accrual Tax,Labor Portfolio,Labor Tax\n';
+            let csv = 'Date,Box 3 Old School Portfolio,Box 3 Old School Tax,Box 3 Revamped Portfolio,Box 3 Revamped Tax,Timmerfrans Special Portfolio,Timmerfrans Special Tax\n';
             
             dates.forEach((date, idx) => {
                 csv += `${date},${forfait[idx].portfolioValue.toFixed(2)},${forfait[idx].cumulativeTax.toFixed(2)},`;
