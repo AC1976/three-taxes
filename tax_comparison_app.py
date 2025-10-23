@@ -42,15 +42,16 @@ def fetch_msci_data(start_date, end_date):
             if not data.empty:
                 st.sidebar.success(f"✓ Using {ticker} as MSCI World proxy")
                 return data['Adj Close']
-        except:
+        except Exception as e:
+            st.sidebar.warning(f"Failed to fetch {ticker}: {str(e)}")
             continue
     
-    st.error("Could not fetch MSCI World data from any source")
+    st.error("Could not fetch MSCI World data from any source. Please check your internet connection.")
     return None
 
 # Fetch data
 start_date = "2021-01-01"
-end_date = "2025-12-31"
+end_date = datetime.now().strftime("%Y-%m-%d")  # Use today's date
 
 with st.spinner("Fetching MSCI World Index data..."):
     price_data = fetch_msci_data(start_date, end_date)
