@@ -9,7 +9,7 @@ from plotly.subplots import make_subplots
 st.set_page_config(page_title="Investment Tax Model Comparison", layout="wide")
 
 st.title("🏦 Investment Tax Model Comparison")
-st.markdown("Compare three different taxation models on investment returns using MSCI World Index data")
+st.markdown("Compare three different taxation models on investment returns using S&P 500 (SPY) data")
 
 # Sidebar for parameters
 st.sidebar.header("📊 Model Parameters")
@@ -30,30 +30,50 @@ labor_tax_rate = st.sidebar.slider("Labor Tax Rate (%)", min_value=0.0, max_valu
 wealth_tax_rate = st.sidebar.slider("Wealth Tax Rate (%)", min_value=0.0, max_value=5.0, value=1.0, step=0.1)
 wealth_tax_threshold = st.sidebar.number_input("Wealth Tax Threshold (EUR)", value=200000, step=10000, min_value=0)
 
+st.sidebar.markdown("---")
+run_button = st.sidebar.button("🔄 Recalculate", type="primary", use_container_width=True)
+
 # Function to fetch MSCI World data
 @st.cache_data
 def fetch_msci_data(start_date, end_date):
-    """Fetch MSCI World Index data. Try multiple tickers."""
-    tickers_to_try = ['URTH', 'ACWI', 'IWDA.AS']  # iShares MSCI World ETFs
-    
-    for ticker in tickers_to_try:
-        try:
-            data = yf.download(ticker, start=start_date, end=end_date, progress=False)
-            if not data.empty:
-                st.sidebar.success(f"✓ Using {ticker} as MSCI World proxy")
-                return data['Adj Close']
-        except Exception as e:
-            st.sidebar.warning(f"Failed to fetch {ticker}: {str(e)}")
-            continue
-    
-    st.error("Could not fetch MSCI World data from any source. Please check your internet connection.")
-    return None
+    """Fetch S&P 500 (SPY) data."""
+    try:
+        st.sidebar.info("Fetching S&P 500 (SPY) data...")
+        data = yf.download('SPY', start=start_date, end=end_date, progress=False)
+        
+        if data.empty:
+            st.error("No SPY data returned. Please check your internet connection.")
+            return None
+        
+        # Handle different column structures
+        if 'Adj Close' in data.columns:
+            price_data = data['Adj Close']
+        elif 'Close' in data.columns:
+            price_data = data['Close']
+        else:
+            # Handle MultiIndex columns
+            if isinstance(data.columns, pd.MultiIndex):
+                price_data = data[('Adj Close', 'SPY')] if ('Adj Close', 'SPY') in data.columns else data[('Close', 'SPY')]
+            else:
+                st.error("Unexpected column structure in SPY data")
+                return None
+        
+        if len(price_data.dropna()) > 100:
+            st.sidebar.success(f"✓ Loaded {len(price_data)} days of SPY data")
+            return price_data
+        else:
+            st.error(f"Insufficient SPY data: only {len(price_data.dropna())} days")
+            return None
+            
+    except Exception as e:
+        st.error(f"Failed to fetch SPY data: {str(e)}")
+        return None
 
 # Fetch data
-start_date = "2021-01-01"
+start_date = "2001-01-01"
 end_date = datetime.now().strftime("%Y-%m-%d")  # Use today's date
 
-with st.spinner("Fetching MSCI World Index data..."):
+with st.spinner("Fetching S&P 500 (SPY) data..."):
     price_data = fetch_msci_data(start_date, end_date)
 
 if price_data is not None:
@@ -81,6 +101,9 @@ if price_data is not None:
     df['is_year_start'] = (df['date'].dt.month == 1) & (df['date'].dt.day == 1)
     df['is_year_end'] = (df['date'].dt.month == 12) & (df['date'].dt.day == 31)
     
+    # Mark first trading day of each year (for forfait tax)
+    df['is_first_trading_day'] = df.groupby('year')['date'].transform('min') == df['date']
+    
     # If Dec 31 doesn't exist, use last trading day of December
     for year in df['year'].unique():
         if not any((df['year'] == year) & (df['month'] == 12) & df['is_year_end']):
@@ -105,8 +128,8 @@ if price_data is not None:
             
             portfolio_value = shares * row['price']
             
-            # Annual tax on Jan 1 (calculated on previous year-end value)
-            if row['is_year_start'] and row['year'] > 2021:
+            # Annual tax on first trading day of year (based on portfolio value)
+            if row['is_first_trading_day'] and row['year'] > 2001:
                 tax_base = portfolio_value
                 tax_amount = tax_base * (r_rate / 100) * (tax_rate / 100)
                 cumulative_tax += tax_amount
@@ -116,7 +139,7 @@ if price_data is not None:
                 portfolio_value = shares * row['price']
             
             # Monthly contribution at month end
-            if row['is_month_end'] and not (row['year'] == 2021 and row['month'] == 1):
+            if row['is_month_end'] and not (row['year'] == 2001 and row['month'] == 1):
                 new_shares = monthly_contrib / row['price']
                 shares += new_shares
                 portfolio_value = shares * row['price']
@@ -172,7 +195,7 @@ if price_data is not None:
                 year_start_value = portfolio_value
             
             # Monthly contribution at month end
-            if row['is_month_end'] and not (row['year'] == 2021 and row['month'] == 1):
+            if row['is_month_end'] and not (row['year'] == 2001 and row['month'] == 1):
                 new_shares = monthly_contrib / row['price']
                 shares += new_shares
                 portfolio_value = shares * row['price']
@@ -242,7 +265,7 @@ if price_data is not None:
                 year_start_value = portfolio_value
             
             # Monthly contribution at month end
-            if row['is_month_end'] and not (row['year'] == 2021 and row['month'] == 1):
+            if row['is_month_end'] and not (row['year'] == 2001 and row['month'] == 1):
                 new_shares = monthly_contrib / row['price']
                 shares += new_shares
                 portfolio_value = shares * row['price']
@@ -262,13 +285,16 @@ if price_data is not None:
         return pd.DataFrame(results)
     
     # Run simulations
-    with st.spinner("Running simulations..."):
+    with st.spinner("Running simulations with current parameters..."):
         forfait_results = simulate_forfait(df, initial_investment, monthly_contribution, 
                                            forfait_r, forfait_tax_rate)
         accrual_results = simulate_accrual(df, initial_investment, monthly_contribution, 
                                           accrual_tax_rate)
         labor_results = simulate_labor(df, initial_investment, monthly_contribution, 
                                       labor_tax_rate, wealth_tax_rate, wealth_tax_threshold)
+    
+    # Show that calculation is complete
+    st.success("✓ Calculations complete!")
     
     # Display key metrics
     st.header("📈 Final Results Summary")
