@@ -39,7 +39,20 @@ def fetch_msci_data(start_date, end_date):
     """Fetch S&P 500 (SPY) data."""
     try:
         st.sidebar.info("Fetching S&P 500 (SPY) data...")
-        data = yf.download('SPY', start=start_date, end=end_date, progress=False)
+        # Add timeout and retry logic for Streamlit Cloud
+        import time
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                data = yf.download('SPY', start=start_date, end=end_date, progress=False, timeout=30)
+                if not data.empty:
+                    break
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    st.sidebar.warning(f"Retry {attempt + 1}/{max_retries}...")
+                    time.sleep(2)
+                else:
+                    raise e
         
         if data.empty:
             st.error("No SPY data returned. Please check your internet connection.")
@@ -67,6 +80,7 @@ def fetch_msci_data(start_date, end_date):
             
     except Exception as e:
         st.error(f"Failed to fetch SPY data: {str(e)}")
+        st.info("Try refreshing the page or check back later.")
         return None
 
 # Fetch data
